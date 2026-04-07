@@ -1,0 +1,30 @@
+{
+  "name": "react-app",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "sync:spotify": "node scripts/spotify-sync.mjs",
+    "sync:bandcamp": "node scripts/bandcamp-sync.mjs",
+    "sync:soundcloud": "node scripts/soundcloud-sync.mjs",
+    "sync:facebook": "node scripts/facebook-sync.mjs",
+    "sync:instagram": "node scripts/instagram-sync.mjs",
+    "sync:x": "node scripts/x-sync.mjs",
+    "sync:apple": "node scripts/apple-search-sync.mjs",
+    "sync:youtube": "node scripts/youtube-sync.mjs",
+    "sync:youtube:auto": "node scripts/youtube-search-sync.mjs",
+    "sync:youtube-music": "node scripts/youtube-music-sync.mjs"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.101.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.3.1",
+    "vite": "^5.4.10"
+  }
+}

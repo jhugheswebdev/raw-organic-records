@@ -378,38 +378,7 @@ function getReleaseTypeLabel(release) {
 }
 
 function getReleaseLinksWithArtistFallback(release, normalizedReleaseLinks, artistLinksByArtistId) {
-  const directLinks = normalizedReleaseLinks.filter((link) => link.releaseId === release.id);
-  const hasSoundCloudLink = directLinks.some(
-    (link) => (link.platform || "").toLowerCase() === "soundcloud"
-  );
-  const hasAppleLink = directLinks.some((link) => {
-    const platform = (link.platform || "").toLowerCase();
-    return platform === "apple music" || platform === "apple_music";
-  });
-
-  if (hasAppleLink || hasSoundCloudLink) {
-    return directLinks;
-  }
-
-  const artistAppleLink = (artistLinksByArtistId.get(release.artist_id) || []).find((link) => {
-    const platform = (link.platform || "").toLowerCase();
-    return platform === "apple_music" || platform === "apple music";
-  });
-
-  if (!artistAppleLink?.url) {
-    return directLinks;
-  }
-
-  return [
-    ...directLinks,
-    {
-      id: `artist-fallback-${artistAppleLink.id}`,
-      releaseId: release.id,
-      platform: formatPlatformLabel(artistAppleLink.platform),
-      url: artistAppleLink.url,
-      label: getArtistLinkDisplayLabel(artistAppleLink),
-    },
-  ];
+  return normalizedReleaseLinks.filter((link) => link.releaseId === release.id);
 }
 
 function getEmbedUrl(link) {

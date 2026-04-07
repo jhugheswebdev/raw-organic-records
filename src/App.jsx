@@ -1621,7 +1621,7 @@ useEffect(() => {
       {route.page === "home" ? (
         <main className="page active">
           <section className="hero">
-            <p className="hero-label">Independent / Austin, TX / Est. 2026</p>
+            <p className="hero-label">Independent / DC//ATX//SATX / Est. 2026</p>
             <h1 className="hero-title">Sound rooted in something real.</h1>
             <p className="hero-sub">
               Raw Organic Records is building a home for artists. No algorithms. No shortcuts.

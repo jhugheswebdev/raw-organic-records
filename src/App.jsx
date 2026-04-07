@@ -1368,6 +1368,10 @@ useEffect(() => {
 }, []);
 
   useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+  }, [route]);
+
+  useEffect(() => {
     const onHashChange = () => {
       const nextRoute = getInitialRoute();
       setRoute(nextRoute);

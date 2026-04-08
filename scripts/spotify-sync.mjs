@@ -67,6 +67,10 @@ function stableUuid(prefix, value) {
   ].join("-");
 }
 
+function getReleaseLookupKey(artistId, slug) {
+  return `${artistId}:${slug}`;
+}
+
 function getSpotifyArtistIdFromUrl(url) {
   if (!url) {
     return null;
@@ -190,18 +194,21 @@ async function buildSpotifyArtistSources(supabase) {
   }, {});
 }
 
-function toReleaseRows(albumsByArtist) {
+function toReleaseRows(albumsByArtist, existingReleaseIdByKey) {
   return albumsByArtist
     .map(({ artistId, album }) => {
       if (!artistId) {
         return null;
       }
 
+      const slug = slugify(album.name);
+      const existingReleaseId = existingReleaseIdByKey.get(getReleaseLookupKey(artistId, slug));
+
       return {
-        id: stableUuid("spotify-release", album.id),
+        id: existingReleaseId || stableUuid("spotify-release", album.id),
         artist_id: artistId,
         title: album.name,
-        slug: slugify(album.name),
+        slug,
         release_type: album.album_type,
         release_date: album.release_date,
         cover_image_url: album.images?.[0]?.url ?? null,
@@ -211,16 +218,19 @@ function toReleaseRows(albumsByArtist) {
     .filter(Boolean);
 }
 
-function toReleaseLinkRows(albumsByArtist) {
+function toReleaseLinkRows(albumsByArtist, existingReleaseIdByKey) {
   return albumsByArtist
     .map(({ artistId, album }) => {
       if (!artistId || !album.external_urls?.spotify) {
         return null;
       }
 
+      const slug = slugify(album.name);
+      const existingReleaseId = existingReleaseIdByKey.get(getReleaseLookupKey(artistId, slug));
+
       return {
         id: stableUuid("spotify-release-link", album.id),
-        release_id: stableUuid("spotify-release", album.id),
+        release_id: existingReleaseId || stableUuid("spotify-release", album.id),
         platform: "spotify",
         url: album.external_urls.spotify,
         embed_url: `https://open.spotify.com/embed/album/${album.id}`,
@@ -242,6 +252,26 @@ async function main() {
     .filter(Boolean);
 
   const artistSources = await buildSpotifyArtistSources(supabase);
+  const artistIds = Array.from(
+    new Set(Object.values(artistSources).map((source) => source.artistId).filter(Boolean))
+  );
+  const existingReleases = artistIds.length
+    ? await (async () => {
+        const { data, error } = await supabase
+          .from("releases")
+          .select("id, artist_id, slug")
+          .in("artist_id", artistIds);
+
+        if (error) {
+          throw error;
+        }
+
+        return data || [];
+      })()
+    : [];
+  const existingReleaseIdByKey = new Map(
+    existingReleases.map((release) => [getReleaseLookupKey(release.artist_id, release.slug), release.id])
+  );
   const accessToken = await getSpotifyAccessToken();
   const albumsByArtist = [];
   const failedArtists = [];
@@ -294,8 +324,8 @@ async function main() {
     }
   }
 
-  const releaseRows = toReleaseRows(albumsByArtist);
-  const releaseLinkRows = toReleaseLinkRows(albumsByArtist);
+  const releaseRows = toReleaseRows(albumsByArtist, existingReleaseIdByKey);
+  const releaseLinkRows = toReleaseLinkRows(albumsByArtist, existingReleaseIdByKey);
 
   const { error: releaseError } = await supabase
     .from("releases")

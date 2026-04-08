@@ -400,6 +400,20 @@ function getEmbedUrl(link) {
     }
   }
 
+  if (platform === "apple music" || platform === "apple_music") {
+    if (url.includes("embed.music.apple.com/")) {
+      return url;
+    }
+
+    const normalizedAppleUrl = url.replace("music.apple.com/", "embed.music.apple.com/");
+
+    if (normalizedAppleUrl.includes("embed.music.apple.com/")) {
+      return normalizedAppleUrl.includes("?")
+        ? `${normalizedAppleUrl}&app=music`
+        : `${normalizedAppleUrl}?app=music`;
+    }
+  }
+
   if (platform === "youtube" || platform === "youtube music" || platform === "youtube_music") {
     const watchMatch = url.match(/[?&]v=([^&]+)/i);
     const shortMatch = url.match(/youtu\.be\/([^?&/]+)/i);
@@ -413,6 +427,14 @@ function getEmbedUrl(link) {
     if (playlistMatch?.[1]) {
       return `https://www.youtube.com/embed/videoseries?list=${playlistMatch[1]}`;
     }
+  }
+
+  if (platform === "soundcloud") {
+    if (url.includes("w.soundcloud.com/player/")) {
+      return url;
+    }
+
+    return `https://w.soundcloud.com/player/?url=${encodeURIComponent(url)}&color=%237a1e1e&auto_play=false&hide_related=false&show_comments=true&show_user=true&show_reposts=false&show_teaser=true`;
   }
 
   if (platform === "bandcamp") {

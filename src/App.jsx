@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "./supabaseClient";
+import { Analytics } from "@vercel/analytics/react";
+
 
 const pages = [
   { id: "home", label: "Home" },
@@ -1767,6 +1769,7 @@ useEffect(() => {
           </div>
         </main>
       ) : null}
+      <Analytics />
     </div>
   );
 }
